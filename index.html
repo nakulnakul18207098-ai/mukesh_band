@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mukesh Band</title>
+
+<style>
+body {
+  margin:0;
+  font-family: Arial;
+  background:black;
+  color:gold;
+  text-align:center;
+  overflow-x:hidden;
+}
+
+canvas {
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:-1;
+}
+
+header {
+  padding:100px 20px;
+}
+
+h1 { font-size:50px; }
+
+section {
+  padding:60px 20px;
+}
+
+.services, .gallery {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:20px;
+}
+
+.card {
+  background:rgba(255,215,0,0.1);
+  padding:20px;
+  border-radius:15px;
+  width:250px;
+}
+
+.gallery img {
+  width:250px;
+  border-radius:10px;
+}
+
+input, textarea {
+  width:80%;
+  padding:10px;
+  margin:10px;
+  border:none;
+  border-radius:5px;
+}
+
+button {
+  padding:10px 20px;
+  background:gold;
+  border:none;
+  cursor:pointer;
+}
+
+#adminPanel {
+  display:none;
+  margin-top:30px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Mukesh Band 🎺</h1>
+<p>Wedding Band Booking (Price on Request)</p>
+</header>
+
+<section>
+<h2>Our Services</h2>
+<div class="services">
+<div class="card">Wedding Band</div>
+<div class="card">Baraat Entry</div>
+<div class="card">Ghodi & Baggi</div>
+</div>
+</section>
+
+<section>
+<h2>Gallery</h2>
+<div class="gallery">
+<img src="https://images.unsplash.com/photo-1519741497674-611481863552">
+<img src="https://images.unsplash.com/photo-1520857014576-2c4f4c972b57">
+<img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc">
+</div>
+</section>
+
+<section>
+<h2>Book Your Event</h2>
+
+<form onsubmit="checkBooking(event)">
+<input type="text" id="name" placeholder="Your Name" required><br>
+<input type="date" id="date" required><br>
+<textarea id="address" placeholder="Event Address" required></textarea><br>
+<button type="submit">Check Availability</button>
+</form>
+
+<div id="result" style="margin-top:20px;"></div>
+
+<br>
+<button onclick="openAdmin()">Admin Login</button>
+
+<div id="adminPanel">
+<input type="password" id="adminPass" placeholder="Password">
+<button onclick="login()">Login</button>
+
+<div id="adminContent" style="display:none;">
+
+<h3>Add Offline Booking</h3>
+<input type="date" id="offlineDate">
+<button onclick="addOffline()">Add</button>
+
+<h3>Booked Dates</h3>
+<ul id="dateList"></ul>
+
+</div>
+</div>
+
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+// 3D Background
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({alpha:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16);
+const material = new THREE.MeshBasicMaterial({color:0xffd700, wireframe:true});
+const torus = new THREE.Mesh(geometry, material);
+scene.add(torus);
+
+camera.position.z = 30;
+
+function animate(){
+requestAnimationFrame(animate);
+torus.rotation.x += 0.01;
+torus.rotation.y += 0.01;
+renderer.render(scene, camera);
+}
+animate();
+
+// Booking system
+let bookedDates = JSON.parse(localStorage.getItem("bookings")) || [];
+
+function saveBookings(){
+localStorage.setItem("bookings", JSON.stringify(bookedDates));
+}
+
+function checkBooking(e){
+e.preventDefault();
+
+let name = document.getElementById("name").value;
+let date = document.getElementById("date").value;
+let address = document.getElementById("address").value;
+
+if(bookedDates.includes(date)){
+document.getElementById("result").innerHTML =
+"❌ Sorry, this date is already booked.";
+} else {
+bookedDates.push(date);
+saveBookings();
+
+document.getElementById("result").innerHTML =
+`✅ Date Available!<br><br>
+
+📞 Phone: 8700425307 / 9911730313<br><br>
+
+📍 Address: 6542, Qutab Road, beside Rajdhani Hospital, Paharganj, New Delhi - 110055<br><br>
+
+<a href="tel:8700425307">
+<button>Call Now</button>
+</a>
+
+<br><br>
+
+<a target="_blank" href="https://wa.me/918700425307?text=Hello Mukesh Band, I want to book for date: ${date}">
+<button>WhatsApp</button>
+</a>`;
+}
+}
+
+// Admin
+function openAdmin(){
+document.getElementById("adminPanel").style.display="block";
+}
+
+function login(){
+if(document.getElementById("adminPass").value==="1234"){
+document.getElementById("adminContent").style.display="block";
+showDates();
+}else{
+alert("Wrong Password");
+}
+}
+
+function showDates(){
+let list=document.getElementById("dateList");
+list.innerHTML="";
+bookedDates.forEach(d=>{
+let li=document.createElement("li");
+li.innerText=d;
+list.appendChild(li);
+});
+}
+
+function addOffline(){
+let d=document.getElementById("offlineDate").value;
+if(bookedDates.includes(d)){
+alert("Already booked");
+}else{
+bookedDates.push(d);
+saveBookings();
+showDates();
+}
+}
+</script>
+
+</body>
+</html>
